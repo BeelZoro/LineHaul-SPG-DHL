@@ -1,0 +1,25 @@
+[
+    {
+        "status":"EM TRÂNSITO",
+        "viagem":"2026/1001",
+        "cliente":"HONDA",
+        "placa":"ABC1234",
+        "volumes":560
+    },
+
+    {
+        "status":"FINALIZADA",
+        "viagem":"2026/1002",
+        "cliente":"ATLAS",
+        "placa":"DEF1234",
+        "volumes":120
+    },
+
+    {
+        "status":"CANCELADA",
+        "viagem":"2026/1003",
+        "cliente":"PREMIER",
+        "placa":"",
+        "volumes":0
+    }
+]
