@@ -1,49 +1,14 @@
 [
-2
-{
-3
-"status":"EM TRÂNSITO",
-4
-"viagem":"2026/1001",
-5
-"cliente":"HONDA",
-6
-"placa":"ABC1234",
-7
-"volumes":560
-8
-},
-9
- 
-10
-{
-11
-"status":"FINALIZADA",
-12
-"viagem":"2026/1002",
-13
-"cliente":"ATLAS",
-14
-"placa":"DEF1234",
-15
-"volumes":120
-16
-},
-17
- 
-18
-{
-19
-"status":"CANCELADA",
-20
-"viagem":"2026/1003",
-21
-"cliente":"PREMIER",
-22
-"placa":"",
-23
-"volumes":0
-24
-}
-25
+  {
+    "status":"EM TRÂNSITO",
+    "viagem":"2026/1001",
+    "cliente":"HONDA",
+    "placa":"ABC1234",
+    "volumes":560,
+    "notas":58,
+    "opsClock":"09:00",
+    "leadTime":"23:15",
+    "chegadaReal":"08:45",
+    "delta":"-00:15"
+  }
 ]
