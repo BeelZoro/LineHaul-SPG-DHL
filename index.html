@@ -1,16 +1,96 @@
 <!DOCTYPE html>
-
 <html lang="pt-br">
 
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>DHL Line Haul</title>
 
-style.css
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+
+}
+
+body{
+
+font-family:Segoe UI;
+background:#f4f4f4;
+
+}
+
+header{
+
+background:#d40511;
+color:white;
+padding:20px;
+
+}
+
+.cards{
+
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+padding:20px;
+
+}
+
+.card{
+
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,.1);
+
+}
+
+.card h2{
+
+color:#d40511;
+
+}
+
+input{
+
+width:100%;
+padding:12px;
+margin:20px;
+max-width:500px;
+
+}
+
+table{
+
+width:100%;
+border-collapse:collapse;
+background:white;
+
+}
+
+th{
+
+background:#d40511;
+color:white;
+
+}
+
+th,
+td{
+
+padding:10px;
+border:1px solid #ddd;
+
+}
+
+tr:hover{
+
+background:#fff4f4;
+
+}
 
 </head>
 
@@ -95,7 +175,73 @@ placeholder="Pesquisar viagem ou cliente..."
 
 </table>
 
-script.js
+const viagens = [
+
+{
+status:"EM TRÂNSITO",
+viagem:"2026/1001",
+cliente:"HONDA",
+placa:"ABC1234",
+volumes:560
+},
+
+{
+status:"FINALIZADA",
+viagem:"2026/1002",
+cliente:"ATLAS",
+placa:"DEF1234",
+volumes:120
+},
+
+{
+status:"CANCELADA",
+viagem:"2026/1003",
+cliente:"PREMIER",
+placa:"",
+volumes:0
+}
+
+];
+
+document.getElementById("dataAtual").innerText =
+new Date().toLocaleString("pt-BR");
+
+document.getElementById("total").innerText =
+viagens.length;
+
+document.getElementById("transito").innerText =
+viagens.filter(v=>v.status==="EM TRÂNSITO").length;
+
+document.getElementById("finalizadas").innerText =
+viagens.filter(v=>v.status==="FINALIZADA").length;
+
+document.getElementById("canceladas").innerText =
+viagens.filter(v=>v.status==="CANCELADA").length;
+
+const tbody =
+document.getElementById("tbody");
+
+viagens.forEach(v=>{
+
+tbody.innerHTML += `
+
+<tr>
+
+<td>${v.status}</td>
+
+<td>${v.viagem}</td>
+
+<td>${v.cliente}</td>
+
+<td>${v.placa}</td>
+
+<td>${v.volumes}</td>
+
+</tr>
+
+`;
+
+});
 
 </body>
 
