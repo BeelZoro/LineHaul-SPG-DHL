@@ -145,6 +145,7 @@
     type="text"
     id="pesquisa"
     placeholder="Pesquisar viagem ou cliente..."
+    autocomplete="off"
 >
 
 <table>
@@ -185,34 +186,31 @@
 
 <script>
 
-const viagens = [
+async function carregarDados(){
 
-    {
-        status:"EM TRÂNSITO",
-        viagem:"2026/1001",
-        cliente:"HONDA",
-        placa:"ABC1234",
-        volumes:560
-    },
+    try{
 
-    {
-        status:"FINALIZADA",
-        viagem:"2026/1002",
-        cliente:"ATLAS",
-        placa:"DEF1234",
-        volumes:120
-    },
+        const resposta = await fetch("./dados.json");
 
-    {
-        status:"CANCELADA",
-        viagem:"2026/1003",
-        cliente:"PREMIER",
-        placa:"",
-        volumes:0
+        if(!resposta.ok){
+            throw new Error("Erro ao carregar JSON");
+        }
+
+        const viagens = await resposta.json();
+
+        renderizarDashboard(viagens);
+
+    }
+    catch(erro){
+
+        console.error(erro);
+
+        alert("Não foi possível carregar os dados.");
+
     }
 
-];
-
+}
+    
 function atualizarData() {
 
     document.getElementById("dataAtual").innerText =
@@ -224,53 +222,62 @@ setInterval(atualizarData,1000);
 
 atualizarData();
 
-document.getElementById("total").innerText =
-viagens.length;
+function renderizarDashboard(viagens){
 
-document.getElementById("transito").innerText =
-viagens.filter(v => v.status === "EM TRÂNSITO").length;
+    document.getElementById("total").innerText =
+    viagens.length;
 
-document.getElementById("finalizadas").innerText =
-viagens.filter(v => v.status === "FINALIZADA").length;
+    document.getElementById("transito").innerText =
+    viagens.filter(v => v.status === "EM TRÂNSITO").length;
 
-document.getElementById("canceladas").innerText =
-viagens.filter(v => v.status === "CANCELADA").length;
+    document.getElementById("finalizadas").innerText =
+    viagens.filter(v => v.status === "FINALIZADA").length;
 
-const tbody = document.getElementById("tbody");
+    document.getElementById("canceladas").innerText =
+    viagens.filter(v => v.status === "CANCELADA").length;
 
-viagens.forEach(v => {
+    const tbody =
+    document.getElementById("tbody");
 
-    const linha = document.createElement("tr");
+    tbody.innerHTML = "";
 
-    linha.innerHTML = `
-        <td>${v.status}</td>
-        <td>${v.viagem}</td>
-        <td>${v.cliente}</td>
-        <td>${v.placa}</td>
-        <td>${v.volumes}</td>
-    `;
+    viagens.forEach(v => {
 
-    linha.onclick = function(){
+        const linha = document.createElement("tr");
 
-        document.getElementById("detalhes").style.display = "block";
+        linha.innerHTML = `
+            <td>${v.status}</td>
+            <td>${v.viagem}</td>
+            <td>${v.cliente}</td>
+            <td>${v.placa}</td>
+            <td>${v.volumes}</td>
+        `;
 
-        document.getElementById("detViagem").innerText = v.viagem;
-        document.getElementById("detCliente").innerText = v.cliente;
-        document.getElementById("detPlaca").innerText = v.placa;
-        document.getElementById("detVolumes").innerText = v.volumes;
-        document.getElementById("detStatus").innerText = v.status;
+        linha.onclick = function(){
 
-        document.getElementById("detalhes")
-        .scrollIntoView({
-            behavior:"smooth"
-        });
+            document.getElementById("detalhes").style.display = "block";
 
-    };
+            document.getElementById("detViagem").innerText = v.viagem;
+            document.getElementById("detCliente").innerText = v.cliente;
+            document.getElementById("detPlaca").innerText = v.placa;
+            document.getElementById("detVolumes").innerText = v.volumes;
+            document.getElementById("detStatus").innerText = v.status;
 
-    tbody.appendChild(linha);
+            document.getElementById("detalhes")
+            .scrollIntoView({
+                behavior:"smooth"
+            });
 
-});
+        };
 
+        tbody.appendChild(linha);
+
+    });
+
+}
+    
+carregarDados();
+    
 </script>
 
 </body>
