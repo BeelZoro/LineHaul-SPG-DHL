@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>DHL Line Haul</title>
+    <title>DHL Line Haul Dashboard</title>
 
     <style>
 
@@ -23,33 +23,40 @@
         header{
             background:#d40511;
             color:white;
-            padding:20px;
+            padding:30px;
         }
 
         .cards{
             display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-            gap:15px;
-            padding:20px;
+            grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+            gap:20px;
+            padding:25px;
         }
 
         .card{
             background:white;
-            padding:20px;
-            border-radius:10px;
-            box-shadow:0 2px 10px rgba(0,0,0,.1);
+            padding:25px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,.1);
         }
 
         .card h2{
             color:#d40511;
+            font-size:40px;
+        }
+
+        .card p{
+            margin-top:10px;
+            font-size:18px;
         }
 
         input{
-            width:calc(100% - 40px);
-            padding:12px;
-            margin:20px;
-            border:1px solid #ddd;
-            border-radius:8px;
+            width:calc(100% - 50px);
+            margin:0 25px 25px 25px;
+            padding:15px;
+            border:2px solid #333;
+            border-radius:10px;
+            font-size:16px;
         }
 
         table{
@@ -61,17 +68,39 @@
         th{
             background:#d40511;
             color:white;
+            text-align:left;
         }
 
-        th,
-        td{
-            padding:12px;
+        th,td{
+            padding:15px;
             border:1px solid #ddd;
-            text-align:left;
+        }
+
+        tr{
+            cursor:pointer;
         }
 
         tr:hover{
             background:#fff4f4;
+        }
+
+        #detalhes{
+            display:none;
+            margin:25px;
+            background:white;
+            border-radius:12px;
+            padding:25px;
+            box-shadow:0 4px 12px rgba(0,0,0,.1);
+        }
+
+        #detalhes h2{
+            color:#d40511;
+            margin-bottom:15px;
+        }
+
+        #detalhes p{
+            margin:10px 0;
+            font-size:16px;
         }
 
     </style>
@@ -81,8 +110,11 @@
 <body>
 
 <header>
+
     <h1>🚚 DHL Line Haul Dashboard</h1>
+
     <p id="dataAtual"></p>
+
 </header>
 
 <section class="cards">
@@ -109,16 +141,16 @@
 
 </section>
 
-<section>
-    <input
-        id="pesquisa"
-        placeholder="Pesquisar viagem ou cliente..."
-    >
-</section>
+<input
+    type="text"
+    id="pesquisa"
+    placeholder="Pesquisar viagem ou cliente..."
+>
 
 <table>
 
     <thead>
+
         <tr>
             <th>Status</th>
             <th>Viagem</th>
@@ -126,11 +158,30 @@
             <th>Placa</th>
             <th>Volumes</th>
         </tr>
+
     </thead>
 
     <tbody id="tbody"></tbody>
 
 </table>
+
+<div id="detalhes">
+
+    <h2>🚚 Detalhes da Viagem</h2>
+
+    <hr style="margin:15px 0;">
+
+    <p><strong>Viagem:</strong> <span id="detViagem"></span></p>
+
+    <p><strong>Cliente:</strong> <span id="detCliente"></span></p>
+
+    <p><strong>Placa:</strong> <span id="detPlaca"></span></p>
+
+    <p><strong>Volumes:</strong> <span id="detVolumes"></span></p>
+
+    <p><strong>Status:</strong> <span id="detStatus"></span></p>
+
+</div>
 
 <script>
 
@@ -162,10 +213,65 @@ const viagens = [
 
 ];
 
-document.getElementById("dataAtual").innerText =
-new Date().toLocaleString("pt-BR");
+function atualizarData() {
+
+    document.getElementById("dataAtual").innerText =
+    new Date().toLocaleString("pt-BR");
+
+}
+
+setInterval(atualizarData,1000);
+
+atualizarData();
 
 document.getElementById("total").innerText =
 viagens.length;
 
-document.getElementById
+document.getElementById("transito").innerText =
+viagens.filter(v => v.status === "EM TRÂNSITO").length;
+
+document.getElementById("finalizadas").innerText =
+viagens.filter(v => v.status === "FINALIZADA").length;
+
+document.getElementById("canceladas").innerText =
+viagens.filter(v => v.status === "CANCELADA").length;
+
+const tbody = document.getElementById("tbody");
+
+viagens.forEach(v => {
+
+    const linha = document.createElement("tr");
+
+    linha.innerHTML = `
+        <td>${v.status}</td>
+        <td>${v.viagem}</td>
+        <td>${v.cliente}</td>
+        <td>${v.placa}</td>
+        <td>${v.volumes}</td>
+    `;
+
+    linha.onclick = function(){
+
+        document.getElementById("detalhes").style.display = "block";
+
+        document.getElementById("detViagem").innerText = v.viagem;
+        document.getElementById("detCliente").innerText = v.cliente;
+        document.getElementById("detPlaca").innerText = v.placa;
+        document.getElementById("detVolumes").innerText = v.volumes;
+        document.getElementById("detStatus").innerText = v.status;
+
+        document.getElementById("detalhes")
+        .scrollIntoView({
+            behavior:"smooth"
+        });
+
+    };
+
+    tbody.appendChild(linha);
+
+});
+
+</script>
+
+</body>
+</html>   
