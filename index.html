@@ -305,7 +305,7 @@ async function enviarParaGitHub() {
 
     const getFile =
     await fetch(
-        "https://api.github.com/repos/BeelZoro/LineHaul-DHL/contents/DIARIO.xlsx?ref=main",
+        "https://api.github.com/repos/BeelZoro/LineHaul-SPG-DHL/contents/DIARIO.xlsx?ref=main",
         {
             headers:{
                 Authorization:
@@ -325,7 +325,7 @@ async function enviarParaGitHub() {
 
     const upload =
     await fetch(
-        "https://api.github.com/repos/BeelZoro/LineHaul-DHL/contents/DIARIO.xlsx",
+        "https://api.github.com/repos/BeelZoro/LineHaul-SPG-DHL/contents/DIARIO.xlsx",
         {
             method:"PUT",
 
