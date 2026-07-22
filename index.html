@@ -107,6 +107,8 @@
 
 </head>
 
+<script src="xlsx.full.min.js"></script>
+    
 <body>
 
 <header>
@@ -140,7 +142,28 @@
     </div>
 
 </section>
+<div style="padding:25px;">
 
+    <input
+        type="file"
+        id="uploadExcel"
+        accept=".xlsx"
+    >
+
+    <button
+        onclick="enviarParaGitHub()"
+        style="
+        background:#d40511;
+        color:white;
+        border:none;
+        padding:12px 20px;
+        border-radius:8px;
+        cursor:pointer;
+        ">
+        📤 Atualizar Planilha
+    </button>
+
+</div>
 <input
     type="text"
     id="pesquisa"
@@ -182,6 +205,21 @@
 
     <p><strong>Status:</strong> <span id="detStatus"></span></p>
 
+    <p><strong>Linha:</strong> <span id="detLinha"></span></p>
+
+    <p><strong>Notas:</strong> <span id="detNotas"></span></p>
+
+    <p><strong>Prazo:</strong> <span id="detPrazo"></span></p>
+
+    <p><strong>Ops Clock:</strong> <span id="detOpsClock"></span></p>
+
+    <p><strong>Chegada Real:</strong><span id="detChegadaReal"></span></p>
+
+    <p><strong>Lead Time:</strong> <span id="detLeadTime"></span></p>
+
+    <p><strong>Delta:</strong> <span id="detDelta"></span></p>
+
+    <p><strong>Observação:</strong> <span id="detObs"></span></p>
 </div>
 
 <script>
@@ -190,26 +228,143 @@ async function carregarDados(){
 
     try{
 
-        const resposta = await fetch("dados.json");
+        const resposta =
+        await fetch("DIARIO.xlsx");
 
-        if(!resposta.ok){
-            throw new Error("Erro ao carregar JSON");
-        }
+        const arrayBuffer =
+        await resposta.arrayBuffer();
 
-        const viagens = await resposta.json();
+        const workbook =
+        XLSX.read(
+            arrayBuffer,
+            { type:"array" }
+        );
+
+        const aba =
+        workbook.Sheets["REPORT"];
+
+        const viagens =
+        XLSX.utils.sheet_to_json(aba);
 
         renderizarDashboard(viagens);
 
     }
+
     catch(erro){
 
         console.error(erro);
 
-        alert("Não foi possível carregar os dados.");
+        alert("Erro ao carregar DIARIO.xlsx");
 
     }
 
 }
+
+async function enviarParaGitHub() {
+
+    const file =
+    document.getElementById(
+        "uploadExcel"
+    ).files[0];
+
+    if(!file){
+
+        alert("Selecione uma planilha.");
+
+        return;
+
+    }
+
+    const token =
+    prompt("Cole seu Token GitHub:");
+
+    if(!token){
+
+        alert("Token obrigatório.");
+
+        return;
+
+    }
+
+    const base64 =
+    await new Promise(resolve => {
+
+        const reader =
+        new FileReader();
+
+        reader.onload = () =>
+        resolve(
+            reader.result.split(",")[1]
+        );
+
+        reader.readAsDataURL(file);
+
+    });
+
+    let sha = null;
+
+    const getFile =
+    await fetch(
+        "https://api.github.com/repos/BeelZoro/LineHaul-DHL/contents/DIARIO.xlsx?ref=main",
+        {
+            headers:{
+                Authorization:
+                "token " + token
+            }
+        }
+    );
+
+    if(getFile.ok){
+
+        const dados =
+        await getFile.json();
+
+        sha = dados.sha;
+
+    }
+
+    const upload =
+    await fetch(
+        "https://api.github.com/repos/BeelZoro/LineHaul-DHL/contents/DIARIO.xlsx",
+        {
+            method:"PUT",
+
+            headers:{
+                Authorization:
+                "token " + token,
+
+                "Content-Type":
+                "application/json"
+            },
+
+            body:JSON.stringify({
+
+                message:
+                "Atualização via Dashboard",
+
+                content:base64,
+
+                sha:sha,
+
+                branch:"main"
+
+            })
+        }
+    );
+
+    if(upload.ok){
+
+        alert("✅ Planilha enviada!");
+
+        location.reload();
+
+    }else{
+
+        alert("Erro no upload.");
+
+    }
+
+}    
     
 function atualizarData() {
 
@@ -228,13 +383,20 @@ function renderizarDashboard(viagens){
     viagens.length;
 
     document.getElementById("transito").innerText =
-    viagens.filter(v => v.status === "EM TRÂNSITO").length;
+    viagens.filter(
+    v => (v["STATUS"] || "") === "EM TRÂNSITO"
+    ).length;
 
     document.getElementById("finalizadas").innerText =
-    viagens.filter(v => v.status === "FINALIZADA").length;
+    viagens.filter(
+    v => (v["STATUS"] || "") === "FINALIZADA"
+    ).length;
 
     document.getElementById("canceladas").innerText =
-    viagens.filter(v => v.status === "CANCELADA").length;
+    viagens.filter(
+    v => (v["STATUS"] || "") === "CANCELADA"
+    ).length;
+
 
     const tbody =
     document.getElementById("tbody");
@@ -246,33 +408,115 @@ function renderizarDashboard(viagens){
         const linha = document.createElement("tr");
 
         linha.innerHTML = `
-            <td>${v.status}</td>
-            <td>${v.viagem}</td>
-            <td>${v.cliente}</td>
-            <td>${v.placa}</td>
-            <td>${v.volumes}</td>
+            <td>${v["STATUS"] ?? ""}</td>
+            <td>${v["VIAGEM"] ?? ""}</td>
+            <td>${v["CLIENTE"] ?? ""}</td>
+            <td>${v["PLACA CARRETA"] ?? ""}</td>
+            <td>${v["VOLUMES"] ?? ""}</td>
         `;
 
         linha.onclick = function(){
 
             document.getElementById("detalhes").style.display = "block";
 
-            document.getElementById("detViagem").innerText = v.viagem;
-            document.getElementById("detCliente").innerText = v.cliente;
-            document.getElementById("detPlaca").innerText = v.placa;
-            document.getElementById("detVolumes").innerText = v.volumes;
-            document.getElementById("detStatus").innerText = v.status;
+            document.getElementById("detViagem")
+            .innerText = v["VIAGEM"] || "";
 
-            document.getElementById("detalhes")
-            .scrollIntoView({
-                behavior:"smooth"
-            });
+            document.getElementById("detCliente")
+            .innerText = v["CLIENTE"] || "";
 
-        };
+            document.getElementById("detPlaca")
+            .innerText = v["PLACA CARRETA"] || "";
+
+            document.getElementById("detVolumes")
+            .innerText = v["VOLUMES"] || "";
+
+            document.getElementById("detStatus")
+            .innerText = v["STATUS"] || "";
+
+            document.getElementById("detLinha")
+            .innerText = v["LINHA"] ?? "";
+
+            document.getElementById("detNotas")
+            .innerText = v["NOTAS"] ?? "";
+            
+            document.getElementById("detPrazo")
+            .innerText = v["PRAZOS"] ?? "";
+            
+            document.getElementById("detOpsClock")
+            .innerText = v["OPS CLOCK"] ?? "";
+            
+            document.getElementById("detChegadaReal")
+            .innerText = v["CHEGADA REAL"] ?? "";
+            
+            document.getElementById("detLeadTime")
+            .innerText = v["LEAD TIME"] ?? "";
+            
+            document.getElementById("detObs")
+            .innerText = v["OBS"] ?? "";
+
+            document.getElementById("detDelta")
+            .innerText =
+            calcularDelta(
+            v["OPS CLOCK"],
+            v["CHEGADA REAL"]
+    );
+
+    document.getElementById("detalhes")
+    .scrollIntoView({
+        behavior:"smooth"
+    });
+
+};
 
         tbody.appendChild(linha);
 
     });
+
+}
+    
+function calcularDelta(
+    opsClock,
+    chegadaReal
+){
+
+    if(!opsClock || !chegadaReal){
+
+        return "-";
+
+    }
+
+    const ops =
+    Number(opsClock);
+
+    const chegada =
+    Number(chegadaReal);
+
+    if(
+        isNaN(ops) ||
+        isNaN(chegada)
+    ){
+
+        return "-";
+
+    }
+
+    const minutos =
+    Math.round(
+        (chegada - ops) * 1440
+    );
+
+    if(minutos > 0){
+
+        return
+        "+" + minutos +
+        " min (ATRASADO)";
+
+    }
+
+    return
+    minutos +
+    " min (DENTRO DO OC)";
 
 }
     
