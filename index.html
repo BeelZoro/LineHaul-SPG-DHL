@@ -248,43 +248,40 @@ async function carregarDados(){
         const aba =
         workbook.Sheets["REPORT"];
 
-        const viagens =
-        XLSX.utils.sheet_to_json(aba);
-
-        console.log(
-            "TOTAL:",
-            viagens.length
-        );
-
-        console.log(
-            "PRIMEIRO:",
-            viagens[0]
-        );
-
-        if(viagens.length > 0){
-
-            console.log(
-                "COLUNAS:",
-                Object.keys(
-                    viagens[0]
-                )
-            );
-
+        const linhas =
+        XLSX.utils.sheet_to_json(
+        aba,
+        {
+        header:1
         }
+    );
+        
+console.log(linhas[0]);
+console.log(linhas[1]);
+console.log(linhas[2]);
+        
+       const cabecalho = linhas[0];
 
-        renderizarDashboard(
-            viagens
-        );
+const viagens = linhas
+.slice(1)
+.filter(l => l.length > 0)
+.map(l => ({
 
-    }
+    DATA: l[0],
+    CLIENTE: l[1],
+    STATUS: l[2],
+    VIAGEM: l[3],
+    LINHA: l[4],
+    PLACA_CARRETA: l[5],
+    NOTAS: l[6],
+    VOLUMES: l[7],
+    PRAZOS: l[8],
+    OPS_CLOCK: l[9],
+    CHEGADA_REAL: l[10],
+    LEAD_TIME: l[11],
+    OBS: l[12]
 
-    catch(erro){
-
-        console.error(erro);
-
-    }
-
-}
+}));
 
 async function enviarParaGitHub() {
 
@@ -410,17 +407,17 @@ function renderizarDashboard(viagens){
 
     document.getElementById("transito").innerText =
     viagens.filter(
-    v => (v["STATUS"] || "") === "EM TRÂNSITO"
+    v => (v.STATUS || "") === "EM TRÂNSITO"
     ).length;
 
     document.getElementById("finalizadas").innerText =
     viagens.filter(
-    v => (v["STATUS"] || "") === "FINALIZADA"
+    v => (v.STATUS || "") === "FINALIZADA"
     ).length;
 
     document.getElementById("canceladas").innerText =
     viagens.filter(
-    v => (v["STATUS"] || "") === "CANCELADA"
+    v => (v.STATUS || "") === "CANCELADA"
     ).length;
 
 
@@ -434,11 +431,11 @@ function renderizarDashboard(viagens){
         const linha = document.createElement("tr");
 
         linha.innerHTML = `
-            <td>${v["STATUS"] ?? ""}</td>
-            <td>${v["VIAGEM"] ?? ""}</td>
-            <td>${v["CLIENTE"] ?? ""}</td>
-            <td>${v["PLACA CARRETA"] ?? ""}</td>
-            <td>${v["VOLUMES"] ?? ""}</td>
+            <td>${v.STATUS ?? ""}</td>
+            <td>${v.VIAGEM ?? ""}</td>
+            <td>${v.CLIENTE ?? ""}</td>
+            <td>${v.PLACA_CARRETA ?? ""}</td>
+            <td>${v.VOLUMES ?? ""}</td>
         `;
 
         linha.onclick = function(){
@@ -446,46 +443,46 @@ function renderizarDashboard(viagens){
             document.getElementById("detalhes").style.display = "block";
 
             document.getElementById("detViagem")
-            .innerText = v["VIAGEM"] || "";
+            .innerText = v.VIAGEM || "";
 
             document.getElementById("detCliente")
-            .innerText = v["CLIENTE"] || "";
+            .innerText = v.CLIENTE || "";
 
             document.getElementById("detPlaca")
-            .innerText = v["PLACA CARRETA"] || "";
+            .innerText = v.PLACA_CARRETA || "";
 
             document.getElementById("detVolumes")
-            .innerText = v["VOLUMES"] || "";
+            .innerText = v.VOLUMES || "";
 
             document.getElementById("detStatus")
-            .innerText = v["STATUS"] || "";
+            .innerText = v.STATUS || "";
 
             document.getElementById("detLinha")
-            .innerText = v["LINHA"] ?? "";
+            .innerText = v.LINHA ?? "";
 
             document.getElementById("detNotas")
-            .innerText = v["NOTAS"] ?? "";
+            .innerText = v.NOTAS ?? "";
             
             document.getElementById("detPrazo")
-            .innerText = v["PRAZOS"] ?? "";
+            .innerText = v.PRAZOS ?? "";
             
             document.getElementById("detOpsClock")
-            .innerText = v["OPS CLOCK"] ?? "";
+            .innerText = v.OPS_CLOCK ?? "";
             
             document.getElementById("detChegadaReal")
-            .innerText = v["CHEGADA REAL"] ?? "";
+            .innerText = v.CHEGADA_REAL ?? "";
             
             document.getElementById("detLeadTime")
-            .innerText = v["LEAD TIME"] ?? "";
+            .innerText = v.LEAD_TIME ?? "";
             
             document.getElementById("detObs")
-            .innerText = v["OBS"] ?? "";
+            .innerText = v.OBS ?? "";
 
             document.getElementById("detDelta")
             .innerText =
             calcularDelta(
-            v["OPS CLOCK"],
-            v["CHEGADA REAL"]
+            v.OPS_CLOCK,
+            v.CHEGADA_REAL
     );
 
     document.getElementById("detalhes")
